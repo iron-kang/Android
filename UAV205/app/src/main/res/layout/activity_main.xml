@@ -14,42 +14,47 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="5"
+            android:layout_weight="8"
             android:orientation="horizontal">
 
-            <Button
+            <ImageButton
                 android:id="@+id/btn_connect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:background="#00000000"
                 android:onClick="connect"
-                android:text="Connect"
-                tools:layout_editor_absoluteX="175dp"
-                tools:layout_editor_absoluteY="4dp" />
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/disconnected" />
 
             <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="4" />
+                android:layout_weight="2" />
 
             <ImageButton
-                android:layout_width="169dp"
-                android:layout_height="wrap_content"
+                android:id="@+id/btn_lock"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:background="#00000000"
+                android:onClick="lock"
                 android:scaleType="fitCenter"
                 app:srcCompat="@drawable/lock" />
 
             <Space
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="4" />
+                android:layout_weight="2" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Button" />
+                android:background="#00000000"
+                android:scaleType="fitCenter"
+                app:srcCompat="@drawable/signal_none" />
         </LinearLayout>
 
         <LinearLayout
@@ -64,6 +69,7 @@
                 android:layout_height="match_parent"
                 android:layout_toRightOf="@+id/seekbar_reverse"
                 android:layout_weight="1"
+                style="@android:style/Widget.Holo.SeekBar"
                 tools:layout_editor_absoluteX="84dp"
                 tools:layout_editor_absoluteY="89dp" />
 
