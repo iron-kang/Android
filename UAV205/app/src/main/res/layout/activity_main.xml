@@ -6,84 +6,81 @@
     android:layout_height="match_parent"
     tools:context="com.a205.mpc.uav_205.MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        tools:layout_editor_absoluteX="97dp"
+        tools:layout_editor_absoluteY="0dp">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="8"
-            android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/btn_connect"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="27dp"
+            android:background="#00000000"
+            android:onClick="connect"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/disconnected" />
 
-            <ImageButton
-                android:id="@+id/btn_connect"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="#00000000"
-                android:onClick="connect"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/disconnected" />
+        <ImageButton
+            android:id="@+id/btn_lock"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="239dp"
+            android:background="#00000000"
+            android:onClick="lock"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/lock" />
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="2" />
+        <ImageView
+            android:id="@+id/signal"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="75dp"
+            android:background="#00000000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/signal_lv0" />
 
-            <ImageButton
-                android:id="@+id/btn_lock"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="#00000000"
-                android:onClick="lock"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/lock" />
+        <ImageView
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignStart="@+id/control"
+            android:layout_marginBottom="49dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/control_bg" />
 
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="2" />
+        <ImageButton
+            android:id="@+id/control"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="49dp"
+            android:layout_marginEnd="39dp"
+            android:background="#00000000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/control" />
 
-            <ImageView
-                android:id="@+id/signal"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="#00000000"
-                android:scaleType="fitCenter"
-                app:srcCompat="@drawable/signal_lv0" />
-        </LinearLayout>
+        <android.widget.VerticalSeekBar
+            android:id="@+id/seekbar_thrust"
+            style="@android:style/Widget.Holo.SeekBar"
+            android:layout_width="51dp"
+            android:layout_height="239dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="24dp"
+            android:layout_marginStart="57dp"
+            android:minWidth="50dp"
+            android:progressDrawable="@drawable/seekbar_thumb"
+            android:background="@drawable/seekbar_bg"
+            android:scaleType="fitCenter" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <android.widget.VerticalSeekBar
-                android:id="@+id/vertical_Seekbar"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_toRightOf="@+id/seekbar_reverse"
-                android:layout_weight="1"
-                style="@android:style/Widget.Holo.SeekBar"
-                tools:layout_editor_absoluteX="84dp"
-                tools:layout_editor_absoluteY="89dp" />
-
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1" />
-
-            <Space
-                android:layout_width="wrap_content"
-                android:layout_height="97dp"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-    </LinearLayout>
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>
