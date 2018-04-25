@@ -11,19 +11,13 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="horizontal"
-        tools:layout_editor_absoluteX="97dp"
-        tools:layout_editor_absoluteY="0dp">
+        tools:layout_editor_absoluteX="130dp"
+        tools:layout_editor_absoluteY="16dp">
 
-        <ImageButton
-            android:id="@+id/btn_connect"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_alignParentStart="true"
-            android:layout_marginStart="27dp"
-            android:background="#00000000"
-            android:onClick="connect"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/disconnected" />
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/mapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
         <ImageButton
             android:id="@+id/btn_lock"
@@ -36,15 +30,16 @@
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/lock" />
 
-        <ImageView
-            android:id="@+id/signal"
+        <ImageButton
+            android:id="@+id/btn_connect"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="75dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="27dp"
             android:background="#00000000"
+            android:onClick="connect"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/signal_lv0" />
+            app:srcCompat="@drawable/disconnected" />
 
         <ImageView
             android:layout_width="170dp"
@@ -54,6 +49,16 @@
             android:layout_marginBottom="49dp"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/control_bg" />
+
+        <ImageView
+            android:id="@+id/signal"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="75dp"
+            android:background="#00000000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/signal_lv0" />
 
         <ImageButton
             android:id="@+id/control"
@@ -71,14 +76,14 @@
             android:id="@+id/seekbar_thrust"
             style="@android:style/Widget.Holo.SeekBar"
             android:layout_width="51dp"
-            android:layout_height="239dp"
+            android:layout_height="257dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="24dp"
-            android:layout_marginStart="57dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginStart="34dp"
+            android:background="@drawable/seekbar_bg"
             android:minWidth="50dp"
             android:progressDrawable="@drawable/seekbar_thumb"
-            android:background="@drawable/seekbar_bg"
             android:scaleType="fitCenter" />
 
     </RelativeLayout>
