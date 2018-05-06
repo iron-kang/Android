@@ -51,11 +51,20 @@
             app:srcCompat="@drawable/control_bg" />
 
         <ImageView
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="49dp"
+            android:layout_alignStart="@+id/thrust_dir"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/control_bg" />
+
+        <ImageView
             android:id="@+id/signal"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="75dp"
+            android:layout_marginEnd="139dp"
             android:background="#00000000"
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/signal_lv0" />
@@ -72,19 +81,26 @@
             android:scaleType="fitCenter"
             app:srcCompat="@drawable/control" />
 
-        <android.widget.VerticalSeekBar
-            android:id="@+id/seekbar_thrust"
-            style="@android:style/Widget.Holo.SeekBar"
-            android:layout_width="51dp"
-            android:layout_height="257dp"
-            android:layout_alignParentBottom="true"
+        <ImageButton
+            android:id="@+id/thrust_dir"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
             android:layout_alignParentStart="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginStart="34dp"
-            android:background="@drawable/seekbar_bg"
-            android:minWidth="50dp"
-            android:progressDrawable="@drawable/seekbar_thumb"
-            android:scaleType="fitCenter" />
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="49dp"
+            android:layout_marginStart="18dp"
+            android:background="#00000000"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/control" />
+
+        <TextView
+            android:id="@+id/altitude"
+            android:layout_width="101dp"
+            android:layout_height="38dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="19dp"
+            android:text="TextView"
+            tools:text="Altitude:" />
 
     </RelativeLayout>
 

@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -17,15 +16,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VerticalSeekBar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.InputStream;
@@ -47,8 +46,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageButton btn_lock;
     private ImageButton btn_connect;
     private ImageButton btn_control;
+    private ImageButton btn_thrust_dir;
     private ImageView icon_signal;
-    private VerticalSeekBar thrust;
+    private TextView txt_altitude;
     private boolean isLock = true;
     private boolean isConnect = false;
     private WifiInfo wifiInfo;
@@ -56,58 +56,83 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private MapView mapView;
     private InputStream inputStream;
     private GoogleMap gMap;
+    private Marker marker_uav = null;
     private byte[] buf;
     private int[] signal_lv = {R.drawable.signal_lv0, R.drawable.signal_lv1,
             R.drawable.signal_lv2, R.drawable.signal_lv3, R.drawable.signal_lv4};
+    byte[][] cmd_control = {
+        {'b', 'r', 'l', 's', 'b', 'f', 'S'},
+        {'B', ')', '(', 'O', '-', '+', 'o'}
+    };
 
     private View.OnTouchListener btnListener = new View.OnTouchListener() {
         private float x, y, dx, dy;
         private double d;
         private int mx, my;
+        int cmd_id;
+        byte cmd, val;
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {
+            if (v.getId() == R.id.control) {
+                cmd_id = 0;
+                Log.d("btnListener id: ", "controll");
+            }else if (v.getId() == R.id.thrust_dir) {
+                cmd_id = 1;
+                Log.d("btnListener id: ", "thrust");
+            }
+
+            cmd = cmd_control[cmd_id][0];
             if (!isConnect)
                 return true;
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    x_control = btn_control.getX();
-                    y_control = btn_control.getY();
+                    if (v.getId() == R.id.control) {
+                        x_control = btn_control.getX();
+                        y_control = btn_control.getY();
+                    }else if (v.getId() == R.id.thrust_dir) {
+                        x_control = btn_thrust_dir.getX();
+                        y_control = btn_thrust_dir.getY();
+                    }
                     x = event.getX();
                     y = event.getY();
 //                    Log.e("original pos", String.valueOf(x) + "~~" + String.valueOf(y));
 //                    Log.e("raw pos", String.valueOf(event.getRawX()) + "~~" + String.valueOf(event.getRawY()));
                     break;
                 case MotionEvent.ACTION_MOVE:
-
                     Log.d("d", String.valueOf(d));
                     mx = (int) (event.getRawX() - x);
                     my = (int) (event.getRawY() - y);
                     dx = mx - x_control;
                     dy = my - y_control;
                     d = Math.sqrt(dx * dx + dy * dy);
+
                     if (d < 260) {
                         if (dx > 100)
-                            sendCmd(command((byte) 'b', (byte) 'r'));
+                            val = cmd_control[cmd_id][1];
                         else if (dx < -100)
-                            sendCmd(command((byte) 'b', (byte) 'l'));
+                            val = cmd_control[cmd_id][2];
                         else
-                            sendCmd(command((byte) 'b', (byte) 's'));
+                            val = cmd_control[cmd_id][3];
+
+                        sendCmd(command(cmd, val));
 
                         if (dy > 100)
-                            sendCmd(command((byte) 'b', (byte) 'b'));
+                            val = cmd_control[cmd_id][4];
                         else if (dy < -100)
-                            sendCmd(command((byte) 'b', (byte) 'f'));
+                            val = cmd_control[cmd_id][5];
                         else
-                            sendCmd(command((byte) 'b', (byte) 'S'));
+                            val = cmd_control[cmd_id][6];
+
+                        sendCmd(command(cmd, val));
                         v.layout(mx, my, mx + v.getWidth(), my + v.getHeight());
                     }
                     break;
                 case MotionEvent.ACTION_UP:
                     v.layout((int) x_control, (int) y_control,
                             (int) x_control + v.getWidth(), (int) y_control + v.getHeight());
-                    sendCmd(command((byte) 'b', (byte) 's'));
-                    sendCmd(command((byte) 'b', (byte) 'S'));
+                    sendCmd(command(cmd, cmd_control[cmd_id][3]));
+                    sendCmd(command(cmd, cmd_control[cmd_id][6]));
                     break;
             }
 //            Log.e("address", String.valueOf(mx) + "~~" + String.valueOf(my));
@@ -135,49 +160,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btn_connect = (ImageButton) findViewById(R.id.btn_connect);
         btn_lock = (ImageButton) findViewById(R.id.btn_lock);
         btn_control = (ImageButton) findViewById(R.id.control);
+        btn_thrust_dir = (ImageButton) findViewById(R.id.thrust_dir);
         icon_signal = (ImageView) findViewById(R.id.signal);
-        thrust = (VerticalSeekBar) findViewById(R.id.seekbar_thrust);
         mapView = (MapView) findViewById(R.id.mapView);
+        txt_altitude = (TextView) findViewById(R.id.altitude);
         buf = new byte[25];
 
         btn_control.setOnTouchListener(btnListener);
-        thrust.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-                Log.w("Thrust: ", "stop");
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-                Log.w("Thrust: ", "start");
-            }
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                Log.w("Thrust: ", String.valueOf(progress));
-                if (isConnect)
-                    sendCmd(command((byte) 'B', (byte) progress));
-            }
-        });
+        btn_thrust_dir.setOnTouchListener(btnListener);
 
         monitor = new Thread(new Runnable() {
             @Override
             public void run() {
+
                 while (true) {
                     try {
+                        /*
                         WifiManager mWifiManager = (WifiManager) MainActivity.this.getSystemService(MainActivity.WIFI_SERVICE);
                         wifiInfo = mWifiManager.getConnectionInfo();
                         final int level = calculateSignalLevel(wifiInfo.getRssi(), 4);
+                        */
 
-                        runOnUiThread(new Runnable() {
-                            public void run() {
-                                icon_signal.setImageResource(signal_lv[level]);
-                            }
-
-                        });
                         if (isConnect) {
                             sendCmd(command((byte) 'F', (byte) 0));
                             Thread.sleep(10);
@@ -192,7 +195,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         String.valueOf(info.longitude) + ", "+
                                         String.valueOf(info.altitude)
                                 );
+                                if (info. latitude != 0 && info.longitude != 0) {
+                                    final float latitude = info. latitude;
+                                    final float longitude = info.longitude;
+                                    final float altitude = info.altitude;
+                                    runOnUiThread(new Runnable() {
+                                        public void run() {
+                                            Log.e("Info:","map update");
+                                            LatLng uav = new LatLng(latitude, longitude);
+                                            if (marker_uav == null)
+                                                marker_uav = gMap.addMarker(new MarkerOptions().position(uav).title("UAV"));
+                                            else
+                                                marker_uav.setPosition(uav);
+                                            //gMap.moveCamera(CameraUpdateFactory.newLatLng(uav));
+                                            txt_altitude.setText("Altitude:"+String.valueOf(altitude));
+                                        }
+
+                                    });
+                                }
+
                             }
+                            runOnUiThread(new Runnable() {
+                                public void run() {
+                                    //icon_signal.setImageResource(signal_lv[level]);
+
+                                }
+
+                            });
                         }
                         Thread.sleep(200);
                     } catch (Exception e) {
@@ -202,9 +231,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
         monitor.start();
+
+        /*
         WifiManager mWifiManager = (WifiManager) this.getSystemService(this.WIFI_SERVICE);
         wifiInfo = mWifiManager.getConnectionInfo();
-
         if (uav_ssid.compareTo(wifiInfo.getSSID()) != 0) {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
             builder.setTitle("Incorrect SSID");
@@ -220,7 +250,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            dialog.dismiss();
             Toast.makeText(getApplicationContext(), "Icorrect SSID" + wifiInfo.getSSID(), Toast.LENGTH_SHORT).show();
         }
-
+        */
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
@@ -270,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 Log.d("UAV: ", "connect to uav");
                 clientSocket = new Socket();
-                clientSocket.connect(new InetSocketAddress("192.168.123.1", 80), 1000);
+                clientSocket.connect(new InetSocketAddress("192.168.43.100", 80), 1000);
                 if (clientSocket.isConnected()) {
                     clientSocket.setTcpNoDelay(true);
                     runOnUiThread(new Runnable() {
@@ -370,7 +400,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             sendCmd(command((byte) 'd', (byte) 0));
             btn_lock.setImageResource(R.drawable.unlock);
             isLock = false;
-            thrust.setProgress(0);
         } else {
             sendCmd(command((byte) 'D', (byte) 0));
             btn_lock.setImageResource(R.drawable.lock);
@@ -395,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
         gMap.setMinZoomPreference(12);
-        LatLng home = new LatLng(22.611671, 120.321472);
+        LatLng home = new LatLng(22.611874, 120.318968);
         gMap.addMarker(new MarkerOptions().position(home).title("Home"));
         gMap.moveCamera(CameraUpdateFactory.newLatLng(home));
 //        gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
