@@ -16,8 +16,10 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.VerticalSeekBar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ImageButton btn_control;
     private ImageButton btn_thrust_dir;
     private ImageView icon_signal;
+    private VerticalSeekBar thrust;
     private TextView txt_altitude;
     private boolean isLock = true;
     private boolean isConnect = false;
@@ -77,10 +80,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (v.getId() == R.id.control) {
                 cmd_id = 0;
                 Log.d("btnListener id: ", "controll");
-            }else if (v.getId() == R.id.thrust_dir) {
-                cmd_id = 1;
-                Log.d("btnListener id: ", "thrust");
             }
+// else if (v.getId() == R.id.thrust_dir) {
+//                cmd_id = 1;
+//                Log.d("btnListener id: ", "thrust");
+//            }
 
             cmd = cmd_control[cmd_id][0];
             if (!isConnect)
@@ -90,10 +94,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (v.getId() == R.id.control) {
                         x_control = btn_control.getX();
                         y_control = btn_control.getY();
-                    }else if (v.getId() == R.id.thrust_dir) {
-                        x_control = btn_thrust_dir.getX();
-                        y_control = btn_thrust_dir.getY();
                     }
+//                    else if (v.getId() == R.id.thrust_dir) {
+//                        x_control = btn_thrust_dir.getX();
+//                        y_control = btn_thrust_dir.getY();
+//                    }
                     x = event.getX();
                     y = event.getY();
 //                    Log.e("original pos", String.valueOf(x) + "~~" + String.valueOf(y));
@@ -160,14 +165,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         btn_connect = (ImageButton) findViewById(R.id.btn_connect);
         btn_lock = (ImageButton) findViewById(R.id.btn_lock);
         btn_control = (ImageButton) findViewById(R.id.control);
-        btn_thrust_dir = (ImageButton) findViewById(R.id.thrust_dir);
+        //btn_thrust_dir = (ImageButton) findViewById(R.id.thrust_dir);
         icon_signal = (ImageView) findViewById(R.id.signal);
         mapView = (MapView) findViewById(R.id.mapView);
         txt_altitude = (TextView) findViewById(R.id.altitude);
+        thrust = (VerticalSeekBar) findViewById(R.id.seekbar_thrust);
         buf = new byte[25];
 
         btn_control.setOnTouchListener(btnListener);
-        btn_thrust_dir.setOnTouchListener(btnListener);
+        //btn_thrust_dir.setOnTouchListener(btnListener);
+        thrust.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Log.w("Thrust: ", "stop");
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                Log.w("Thrust: ", "start");
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                Log.w("Thrust: ", String.valueOf(progress));
+                if (isConnect)
+                    sendCmd(command((byte) 'B', (byte) progress));
+            }
+        });
 
         monitor = new Thread(new Runnable() {
             @Override
@@ -185,9 +209,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             sendCmd(command((byte) 'F', (byte) 0));
                             Thread.sleep(10);
                             int ret = inputStream.read(buf, 0, 25);
-                            Log.w("Head: ", String .valueOf(buf[0])+", "+String.valueOf(ret));
+                            //Log.w("Head: ", String .valueOf(buf[0])+", "+String.valueOf(ret));
                             if (buf[0] == 'A') {
                                 UAVInfo info = new UAVInfo(buf, 1);
+                                /*
                                 Log.e("Info: ", String.valueOf(info.status) + ", "+
                                         String.valueOf(info.bat) + ", "+
                                         String.valueOf(info.height) + ", "+
@@ -195,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                         String.valueOf(info.longitude) + ", "+
                                         String.valueOf(info.altitude)
                                 );
+                                */
                                 if (info. latitude != 0 && info.longitude != 0) {
                                     final float latitude = info. latitude;
                                     final float longitude = info.longitude;
@@ -300,7 +326,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             try {
                 Log.d("UAV: ", "connect to uav");
                 clientSocket = new Socket();
-                clientSocket.connect(new InetSocketAddress("192.168.43.100", 80), 1000);
+                clientSocket.connect(new InetSocketAddress("192.168.43.123", 80), 1000);
                 if (clientSocket.isConnected()) {
                     clientSocket.setTcpNoDelay(true);
                     runOnUiThread(new Runnable() {
@@ -355,6 +381,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             btn_lock.setImageResource(R.drawable.lock);
             isLock = true;
             btn_connect.setImageResource(R.drawable.disconnected);
+            thrust.setProgress(0);
             isConnect = false;
         }
     }
@@ -379,6 +406,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         public void run() {
                             btn_connect.setImageResource(R.drawable.disconnected);
                             alertDialog("Network error", "Connect fail.");
+                            thrust.setProgress(0);
                         }
                     });
 
@@ -397,12 +425,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         if (isLock) {
-            sendCmd(command((byte) 'd', (byte) 0));
+            sendCmd(command((byte) 'D', (byte) 0));
             btn_lock.setImageResource(R.drawable.unlock);
+            thrust.setProgress(0);
             isLock = false;
         } else {
             sendCmd(command((byte) 'D', (byte) 0));
             btn_lock.setImageResource(R.drawable.lock);
+            thrust.setProgress(0);
             isLock = true;
         }
 
